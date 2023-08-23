@@ -1,4 +1,4 @@
-name: Release CI
+name: Plugin Release
 on:
   pull_request:
   push:
@@ -87,27 +87,14 @@ jobs:
           args: "--all-features --release ${{ matrix.config.extraArgs }}"
 
       - name: Package release assets
-        if: runner.os != 'Windows'
         shell: bash
         run: |
           mkdir _dist
           cp ${{ matrix.config.targetDir }}/check-for-update${{ matrix.config.binExtension }} _dist/
           cp LICENSE _dist/check-for-update.license
           cd _dist
+          ls -al
           tar czf \
-            check-for-update-${{ env.RELEASE_VERSION }}-${{ env.RUNNER_OS }}-${{ matrix.config.arch }}.tar.gz \
-            check-for-update.license \
-            check-for-update${{ matrix.config.binExtension }}
-  
-      - name: (Windows) Package release assets
-        if: runner.os == 'Windows'
-        shell: bash
-        run: |
-          mkdir _dist
-          cp ${{ matrix.config.targetDir }}/check-for-update${{ matrix.config.binExtension }} _dist/
-          cp LICENSE _dist/check-for-update.license
-          cd _dist
-          7z a -tgzip \
             check-for-update-${{ env.RELEASE_VERSION }}-${{ env.RUNNER_OS }}-${{ matrix.config.arch }}.tar.gz \
             check-for-update.license \
             check-for-update${{ matrix.config.binExtension }}
