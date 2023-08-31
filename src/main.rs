@@ -8,12 +8,13 @@ const SPIN_CLI_VERSION_ENV: &str = "SPIN_VERSION";
 fn main() {
     let mut spinner = Spinner::new(Spinners::Dots12, "Checking for latest spin CLI version...".into());
 
-    let Ok(latest) = get_latest_spin_cli_version() else {
-        println!("Failed to get latest version of spin-cli");
-        return;
-    };
     let Ok(installed) = get_installed_spin_cli_version() else {
         println!("Failed to get installed version of spin-cli");
+        return;
+    };
+    
+    let Ok(latest) = get_latest_spin_cli_version() else {
+        println!("Failed to get latest version of spin-cli");
         return;
     };
     spinner.stop_with_newline();
