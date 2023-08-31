@@ -4,10 +4,15 @@ use anyhow::Result;
 use serde::Deserialize;
 use spinners::{Spinner, Spinners};
 
+// link printed when local installation is outdated
 const SPIN_INSTALL_INSTRUCTIONS: &str = "https://developer.fermyon.com/spin/install";
+// root url for retrieving the latest spin-cli version
 const GET_LATEST_SPIN_CLI_ROOT_URL: &str =
     "https://get-latest-spin-cli-version-wuvznxqk.fermyon.app/version";
+
+// Spin provides the currently installed version of the spin-cli via environment variable
 const SPIN_CLI_VERSION_ENV: &str = "SPIN_VERSION";
+// Spin provides the currently installed commit sha of the spin-cli via environment variable
 const SPIN_CLI_COMMIT_SHA_ENV: &str = "SPIN_COMMIT_SHA";
 
 #[derive(Debug, Deserialize)]
@@ -92,4 +97,22 @@ fn main() {
             SPIN_INSTALL_INSTRUCTIONS
         );
     }
+
+    if has_homebrew() {
+        println!();
+        println!("You can also install and mange your spin CLI with Homebrew:");
+        println!("    brew tap fermyon/tap");
+        println!("    brew install fermyon/tap/spin");
+    }
+}
+
+fn has_homebrew() -> bool {
+    if !cfg!(target_os = "macos") && !cfg!(target_os = "linux") {
+        return false;
+    }
+    let output = std::process::Command::new("which")
+        .arg("brew")
+        .output()
+        .expect("Failed to check for homebrew");
+    output.status.success()
 }
