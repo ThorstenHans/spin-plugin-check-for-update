@@ -14,6 +14,12 @@ const GET_LATEST_SPIN_CLI_ROOT_URL: &str =
 const SPIN_CLI_VERSION_ENV: &str = "SPIN_VERSION";
 // Spin provides the currently installed commit sha of the spin-cli via environment variable
 const SPIN_CLI_COMMIT_SHA_ENV: &str = "SPIN_COMMIT_SHA";
+// Spin provides the path of the spin-cli via environment variable
+const SPIN_BIN_PATH_ENV: &str = "SPIN_BIN_PATH";
+// Name of the homebrew tap
+const BREW_TAP_NAME: &str = "fermyon/tap";
+// Name of the homebrew formula
+const BREW_FORMULA_NAME: &str = "spin";
 
 #[derive(Debug, Deserialize)]
 pub struct SpinCliVersion {
@@ -86,24 +92,38 @@ fn main() {
 
     println!();
 
+    let installed_via_brew = is_installed_via_homebrew();
+
     if !installed.is_outdated(&latest) {
         println!("Your spin CLI is up to date! {}) ✅", installed);
     } else {
         println!("Installed spin CLI version:   {}", installed);
         println!("Latest spin CLI version:      {}", latest);
         println!();
-        println!(
-            "See instructions for updating your spin CLI installation at {}",
-            SPIN_INSTALL_INSTRUCTIONS
-        );
+        if installed_via_brew {
+            println!(
+                "To update your spin CLI, run: brew upgrade {}/{}",
+                BREW_TAP_NAME, BREW_FORMULA_NAME
+            );
+        } else {
+            println!(
+                "See instructions for updating your spin CLI installation at {}",
+                SPIN_INSTALL_INSTRUCTIONS
+            );
+        }
     }
 
-    if has_homebrew() {
+    if has_homebrew() && !is_installed_via_homebrew() {
         println!();
         println!("You can also install and mange your spin CLI with Homebrew:");
-        println!("    brew tap fermyon/tap");
-        println!("    brew install fermyon/tap/spin");
+        println!("    brew tap {}", BREW_TAP_NAME);
+        println!("    brew install {}/{}", BREW_TAP_NAME, BREW_FORMULA_NAME);
     }
+}
+
+fn is_installed_via_homebrew() -> bool {
+    let spin_path = std::env::var(SPIN_BIN_PATH_ENV).unwrap_or_default();
+    spin_path.contains("brew")
 }
 
 fn has_homebrew() -> bool {
